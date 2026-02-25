@@ -1,35 +1,65 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.AI;
+using Random = UnityEngine.Random;
 
 public class Enemy : MonoBehaviour
 {
     private Transform goal;
     private int counter;
-    private NavMeshAgent agent;
+    private Rigidbody2D rb;
+    [SerializeField] private List<Transform> waypoints;
+    [SerializeField] private float moveSpeed = 5f;
+    private bool isPlayerTargeted;
     
-    // Start is called before the first frame update
     void Start()
     {
-        agent = GetComponent<NavMeshAgent>();
-        agent.updateRotation = false;
-        agent.updateUpAxis = false;
-        agent.SetDestination(goal.position);
+        rb = GetComponent<Rigidbody2D>();
+        MoveToPoint();
     }
 
-    // Update is called once per frame
     void Update()
     {
-        if (counter == 120)
+        if (goal == null) return;
+        Vector2 direction = (goal.position - transform.position).normalized;
+        rb.velocity = direction * moveSpeed;
+
+        // coś tu się dzieje
+        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+        transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
+
+        if (!isPlayerTargeted)
         {
-            counter = 0;
-            agent.SetDestination(goal.position);
+            // Patrol mode: switch waypoints
+            if (Vector2.Distance(transform.position, goal.position) < 0.5f && counter > 60)
+            {
+                MoveToPoint();
+                counter = 0;
+            }
+            else
+            {
+                counter++;
+            }
         }
         else
         {
-            counter++;
+            // Chase mode: only stop if player is too far away
+            if (Vector2.Distance(transform.position, goal.position) > 10f)
+            {
+                isPlayerTargeted = false;
+                MoveToPoint();
+            }
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.gameObject.CompareTag("Player"))
+        {
+            goal = other.gameObject.transform;
+            isPlayerTargeted = true;
         }
     }
 
@@ -37,7 +67,13 @@ public class Enemy : MonoBehaviour
     {
         if (other.gameObject.CompareTag("Player"))
         {
-            goal = other.gameObject.transform;
+            isPlayerTargeted = false;
+            MoveToPoint();
         }
+    }
+
+    private void MoveToPoint()
+    {
+        goal = waypoints[Random.Range(0, waypoints.Count)];
     }
 }
