@@ -47,6 +47,11 @@ public class PlayerMovement : MonoBehaviour
 
     private void HandleWalkAnimation()
     {
+        animator.SetBool("isWalkingLeft", false);
+        animator.SetBool("isWalkingRight", false);
+        animator.SetBool("isWalkingUp", false);
+        animator.SetBool("isWalkingDown", false);
+
         if (vertical < 0)
         {
             animator.SetBool("isWalkingDown", true);
@@ -62,13 +67,6 @@ public class PlayerMovement : MonoBehaviour
         else if (horizontal > 0)
         {
             animator.SetBool("isWalkingRight", true);
-        }
-        else
-        {
-            animator.SetBool("isWalkingLeft", false);
-            animator.SetBool("isWalkingRight", false);
-            animator.SetBool("isWalkingUp", false);
-            animator.SetBool("isWalkingDown", false);
         }
     }
 }

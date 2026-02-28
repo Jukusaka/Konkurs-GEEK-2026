@@ -1,7 +1,4 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -10,6 +7,7 @@ public class Enemy : MonoBehaviour
     private Transform goal;
     private int counter;
     private Rigidbody2D rb;
+    [SerializeField] private Animator animator;
     [SerializeField] private List<Transform> waypoints;
     [SerializeField] private float moveSpeed = 5f;
     private bool isPlayerTargeted;
@@ -27,10 +25,10 @@ public class Enemy : MonoBehaviour
         if (goal == null) return;
         Vector2 direction = (goal.position - transform.position).normalized;
         rb.velocity = direction * moveSpeed;
+        HandleWalkAnimation(direction);
 
         if (!isPlayerTargeted)
         {
-            // Patrol mode: switch waypoints
             if (Vector2.Distance(transform.position, goal.position) < 0.5f && counter > 60)
             {
                 MoveToPoint();
@@ -43,12 +41,34 @@ public class Enemy : MonoBehaviour
         }
         else
         {
-            // Chase mode: only stop if player is too far away
             if (Vector2.Distance(transform.position, goal.position) > 10f)
             {
                 isPlayerTargeted = false;
                 MoveToPoint();
             }
+        }
+    }
+
+    private void HandleWalkAnimation(Vector2 direction)
+    {
+        animator.SetBool("isWalkingLeft", false);
+        animator.SetBool("isWalkingRight", false);
+        animator.SetBool("isWalkingUp", false);
+        animator.SetBool("isWalkingDown", false);
+
+        if (Mathf.Abs(direction.y) > Mathf.Abs(direction.x))
+        {
+            if (direction.y < 0)
+                animator.SetBool("isWalkingDown", true);
+            else
+                animator.SetBool("isWalkingUp", true);
+        }
+        else
+        {
+            if (direction.x < 0)
+                animator.SetBool("isWalkingLeft", true);
+            else
+                animator.SetBool("isWalkingRight", true);
         }
     }
 
