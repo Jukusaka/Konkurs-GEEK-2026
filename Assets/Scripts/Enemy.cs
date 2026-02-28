@@ -22,13 +22,11 @@ public class Enemy : MonoBehaviour
 
     void Update()
     {
+        transform.rotation = Quaternion.Euler(0, 0, 0);
+        
         if (goal == null) return;
         Vector2 direction = (goal.position - transform.position).normalized;
         rb.velocity = direction * moveSpeed;
-
-        // coś tu się dzieje
-        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-        transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
 
         if (!isPlayerTargeted)
         {

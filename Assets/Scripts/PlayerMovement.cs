@@ -8,6 +8,8 @@ public class PlayerMovement : MonoBehaviour
 {
     Rigidbody2D body;
 
+    [SerializeField] private Animator animator;
+
     float horizontal;
     float vertical;
 
@@ -22,6 +24,7 @@ public class PlayerMovement : MonoBehaviour
     {
         horizontal = Input.GetAxisRaw("Horizontal");
         vertical = Input.GetAxisRaw("Vertical"); 
+        HandleWalkAnimation();
     }
 
     private void FixedUpdate()
@@ -39,6 +42,33 @@ public class PlayerMovement : MonoBehaviour
         if (other.gameObject.CompareTag("Enemy"))
         {
             Die();
+        }
+    }
+
+    private void HandleWalkAnimation()
+    {
+        if (vertical < 0)
+        {
+            animator.SetBool("isWalkingDown", true);
+        }
+        else if (vertical > 0)
+        {
+            animator.SetBool("isWalkingUp", true);
+        }
+        else if (horizontal < 0)
+        {
+            animator.SetBool("isWalkingLeft", true);
+        }
+        else if (horizontal > 0)
+        {
+            animator.SetBool("isWalkingRight", true);
+        }
+        else
+        {
+            animator.SetBool("isWalkingLeft", false);
+            animator.SetBool("isWalkingRight", false);
+            animator.SetBool("isWalkingUp", false);
+            animator.SetBool("isWalkingDown", false);
         }
     }
 }
