@@ -13,7 +13,7 @@ public class DialougeBox : MonoBehaviour
         textBox.SetActive(true);
         if (text == "")
         {
-            text = "jeśli widzisz ten tekst to spierdoliłem ten gówniany kod";
+            text = "jeśli to widzisz to coś poszło nie tak";
         }
         textBox.GetComponentInChildren<TMP_Text>().text = text;
     }

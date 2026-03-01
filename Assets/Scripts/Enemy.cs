@@ -1,51 +1,55 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 using Random = UnityEngine.Random;
 
 public class Enemy : MonoBehaviour
 {
     private Transform goal;
-    private int counter;
     private Rigidbody2D rb;
     [SerializeField] private Animator animator;
     [SerializeField] private List<Transform> waypoints;
-    [SerializeField] private float moveSpeed = 5f;
     private bool isPlayerTargeted;
-    
+    private NavMeshAgent _agent;
+
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        _agent = GetComponent<NavMeshAgent>();
+
+        // Required for 2D NavMesh
+        _agent.updateRotation = false;
+        _agent.updateUpAxis = false;
+
         MoveToPoint();
     }
 
     void Update()
     {
         transform.rotation = Quaternion.Euler(0, 0, 0);
-        
-        if (goal == null) return;
-        Vector2 direction = (goal.position - transform.position).normalized;
-        rb.velocity = direction * moveSpeed;
-        HandleWalkAnimation(direction);
 
-        if (!isPlayerTargeted)
+        if (goal == null) return;
+        
+        if (isPlayerTargeted)
         {
-            if (Vector2.Distance(transform.position, goal.position) < 0.5f && counter > 60)
-            {
-                MoveToPoint();
-                counter = 0;
-            }
-            else
-            {
-                counter++;
-            }
-        }
-        else
-        {
+            _agent.SetDestination(goal.position);
+
             if (Vector2.Distance(transform.position, goal.position) > 10f)
             {
                 isPlayerTargeted = false;
                 MoveToPoint();
             }
+        }
+        
+        Vector2 agentVelocity = _agent.velocity;
+        rb.velocity = agentVelocity;
+
+        if (agentVelocity.sqrMagnitude > 0.01f)
+            HandleWalkAnimation(agentVelocity.normalized);
+        
+        if (!isPlayerTargeted && !_agent.pathPending && _agent.remainingDistance < 0.5f)
+        {
+            MoveToPoint();
         }
     }
 
@@ -78,6 +82,7 @@ public class Enemy : MonoBehaviour
         {
             goal = other.gameObject.transform;
             isPlayerTargeted = true;
+            _agent.SetDestination(goal.position);
         }
     }
 
@@ -93,5 +98,11 @@ public class Enemy : MonoBehaviour
     private void MoveToPoint()
     {
         goal = waypoints[Random.Range(0, waypoints.Count)];
+        _agent.SetDestination(goal.position);
+    }
+
+    public void JebaćDisa()
+    {
+        
     }
 }

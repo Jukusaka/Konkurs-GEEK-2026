@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -14,10 +15,24 @@ public class PlayerMovement : MonoBehaviour
     float vertical;
 
     public float runSpeed = 20.0f;
+    [SerializeField] private GameObject _uiDeath;
+
+    [SerializeField] private List<GameObject> _enemyList;
+    [SerializeField] private GameObject _textbox;
+
+    private int _artifactCouter = -1;
+    [SerializeField] private int _artifactsToWin = 0;
+    [SerializeField] private TextMeshProUGUI _artifactsUI;
+
+    [SerializeField] private AudioSource _footstep;
+
+    [SerializeField] private GameObject _winUI;
 
     void Start ()
     {
-        body = GetComponent<Rigidbody2D>(); 
+        body = GetComponent<Rigidbody2D>();
+        animator = GetComponent<Animator>();
+        UpdateArtifactCounter();
     }
 
     void Update ()
@@ -34,7 +49,13 @@ public class PlayerMovement : MonoBehaviour
 
     public void Die()
     {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        _uiDeath.SetActive(true);
+        _textbox.SetActive(false);
+        foreach (GameObject enemy in _enemyList)
+        {
+            enemy.SetActive(false);
+        }
+        
     }
 
     private void OnCollisionEnter2D(Collision2D other)
@@ -42,6 +63,7 @@ public class PlayerMovement : MonoBehaviour
         if (other.gameObject.CompareTag("Enemy"))
         {
             Die();
+            //Destroy(gameObject);
         }
     }
 
@@ -55,18 +77,47 @@ public class PlayerMovement : MonoBehaviour
         if (vertical < 0)
         {
             animator.SetBool("isWalkingDown", true);
+            _footstep.mute = false;
         }
         else if (vertical > 0)
         {
             animator.SetBool("isWalkingUp", true);
+            _footstep.mute = false;
         }
         else if (horizontal < 0)
         {
             animator.SetBool("isWalkingLeft", true);
+            _footstep.mute = false;
         }
         else if (horizontal > 0)
         {
             animator.SetBool("isWalkingRight", true);
+            _footstep.mute = false;
         }
+        else
+        {
+            _footstep.mute = true;
+        }
+    }
+
+    public void UpdateArtifactCounter()
+    {
+        _artifactCouter++;
+        if (_artifactCouter == _artifactsToWin)
+        {
+            Win();
+        }
+
+        _artifactsUI.text = $"{_artifactCouter}/{_artifactsToWin} artefaktów";
+    }
+
+    private void Win()
+    {
+        _winUI.SetActive(true);
+    }
+    
+    public void JebaćDisa()
+    {
+        
     }
 }
